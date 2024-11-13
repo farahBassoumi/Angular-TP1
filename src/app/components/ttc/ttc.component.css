@@ -1,0 +1,13 @@
+/* ttc-calculator.component.css */
+.ttc-calculator {
+    border: 1px solid #ccc;
+    padding: 20px;
+  }
+  
+  .input-group {
+    margin-bottom: 10px;
+  }
+  
+  .results {
+    margin-top: 20px;
+  }
