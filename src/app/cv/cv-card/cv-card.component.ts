@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, OnChanges, inject, signal } from '@angular/core';
 import { Cv } from '../model/cv';
 import { EmbaucheService } from '../services/embauche.service';
 import { ToastrService } from 'ngx-toastr';
@@ -16,7 +16,7 @@ import { DefaultImagePipe } from '../pipes/default-image.pipe';
     DefaultImagePipe
 ],
 })
-export class CvCardComponent {
+export class CvCardComponent implements OnChanges {
   private embaucheService = inject(EmbaucheService);
   private toastr = inject(ToastrService);
 
@@ -25,19 +25,21 @@ export class CvCardComponent {
 
   constructor() {}
   @Input() cv: Cv | null = null;
-
-  ngOnInit() {}
+  SignalCv=signal<Cv>(new Cv());
+  ngOnChanges() {
+    if(this.cv)
+    this.SignalCv.set(this.cv);
+  }
   embaucher() {
-    if (this.cv) {
-      if (this.embaucheService.embauche(this.cv)) {
+      if (this.embaucheService.embauche(this.SignalCv())) {
         this.toastr.success(
-          `${this.cv?.firstname} ${this.cv?.name} a été pré embauché`
+          `${this.SignalCv()?.firstname} ${this.SignalCv?.name} a été pré embauché`
         );
       } else {
         this.toastr.warning(
-          `${this.cv?.firstname} ${this.cv?.name} est déjà pré embauché`
+          `${this.SignalCv()?.firstname} ${this.SignalCv?.name} est déjà pré embauché`
         );
       }
     }
-  }
+  
 }

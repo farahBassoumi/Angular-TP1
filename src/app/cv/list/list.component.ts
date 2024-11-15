@@ -13,6 +13,6 @@ import { ItemComponent } from "../item/item.component";
     ItemComponent
 ],
 })
-export class ListComponent {
+export class ListComponent  {
   @Input() cvs: Cv[] | null = [];
 }
