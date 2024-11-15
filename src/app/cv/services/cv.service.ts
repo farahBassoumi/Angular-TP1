@@ -1,8 +1,11 @@
 import { Injectable } from "@angular/core";
 import { Cv } from "../model/cv";
-import { Observable, Subject } from "rxjs";
+import { catchError, Observable, of, Subject } from "rxjs";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { API } from "../../../config/api.config";
+import { ToastrService } from "ngx-toastr";
+import { Router } from "@angular/router";
+import { APP_ROUTES } from "src/config/routes.config";
 
 @Injectable({
   providedIn: "root",
@@ -17,7 +20,9 @@ export class CvService {
    * Le flux des cvs sélectionnés
    */
   selectCv$ = this.#selectCvSuject$.asObservable();
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient,    private toastr: ToastrService,    private router: Router,
+
+  ) {
     this.cvs = [
       new Cv(1, "aymen", "sellaouti", "teacher", "as.jpg", "1234", 40),
       new Cv(2, "skander", "sellaouti", "enfant", "       ", "1234", 4),
@@ -55,7 +60,13 @@ export class CvService {
    *
    */
   deleteCvById(id: number): Observable<any> {
-    return this.http.delete<any>(API.cv + id);
+    return this.http.delete<any>(API.cv + id).pipe(catchError((error)=>{
+      this.toastr.error(
+        `Problème avec le serveur veuillez contacter l'admin`
+      );
+      return of();
+    }))
+
   }
 
   addCv(cv: Cv): Observable<Cv> {
@@ -71,7 +82,11 @@ export class CvService {
    *
    */
   getCvById(id: number): Observable<Cv> {
-    return this.http.get<Cv>(API.cv + id);
+    return this.http.get<Cv>(API.cv + id).pipe(catchError((error)=>{
+      console.log(`error while getting cv by id: ${id} `,error);
+      this.router.navigate([APP_ROUTES.cv]);
+      return of();
+    }))
   }
 
   /**
