@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { CredentialsDto } from '../dto/credentials.dto';
 import { ROUTES, Router } from '@angular/router';
@@ -8,31 +8,33 @@ import { FormsModule } from '@angular/forms';
 
 
 @Component({
-    selector: 'app-login',
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.css'],
-    standalone: true,
-    imports: [FormsModule],
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css'],
+  standalone: true,
+  imports: [FormsModule],
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
   private toastr = inject(ToastrService);
 
-  /** Inserted by Angular inject() migration for backwards compatibility */
-  constructor(...args: unknown[]);
 
-  constructor() {}
+  constructor() { }
+
+  ngOnInit(): void {
+    this.authService.loadUserState();
+  }
+
+
   login(credentials: CredentialsDto) {
-    this.authService.login(credentials).subscribe({
-      next: (response) => {
-        localStorage.setItem('token', response.id);
-        this.toastr.success(`Bienvenu chez vous :)`);
-        this.router.navigate([APP_ROUTES.cv]);
-      },
-      error: (error) => {
-        this.toastr.error('Veuillez vérifier vos credentials');
-      },
-    });
+    if (this.authService.login(credentials))
+      this.router.navigate([APP_ROUTES.cv]);
+    else
+      this.toastr.error('Veuillez vérifier vos credentials');
+  }
+
+  logout(): void {
+    this.authService.logout();
   }
 }

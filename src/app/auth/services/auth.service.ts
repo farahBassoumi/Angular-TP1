@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { CredentialsDto } from '../dto/credentials.dto';
 import { LoginResponseDto } from '../dto/login-response.dto';
 import { HttpClient } from '@angular/common/http';
@@ -11,20 +11,49 @@ import { Observable } from 'rxjs';
 export class AuthService {
   private http = inject(HttpClient);
 
-  /** Inserted by Angular inject() migration for backwards compatibility */
-  constructor(...args: unknown[]);
+  private isAuthenticatedSignal = signal(false);
+  private userEmailSignal = signal<string | null>(null);
+  private userIdSignal = signal<string | null>(null);
 
-  constructor() {}
+  isAuthenticated = computed(() => this.isAuthenticatedSignal());
+  userEmail = computed(() => this.userEmailSignal());
+  userId = computed(() => this.userIdSignal());
 
-  login(credentials: CredentialsDto): Observable<LoginResponseDto> {
+  login(credentials: CredentialsDto): boolean {
+    this.callAPI(credentials).subscribe({
+      next: (response) => {
+        this.isAuthenticatedSignal.set(true);
+        this.userEmailSignal.set(credentials.email);
+        this.userIdSignal.set(response.id); 
+        return true;
+      },
+      error: (err) => {
+        console.error('Invalid credentials or API error:', err);
+        this.isAuthenticatedSignal.set(false);
+        this.userEmailSignal.set(null);
+        this.userIdSignal.set(null);
+      }
+    });
+    return false;
+
+  }
+
+  callAPI(credentials: CredentialsDto): Observable<LoginResponseDto> {
     return this.http.post<LoginResponseDto>(API.login, credentials);
   }
 
-  isAuthenticated(): boolean {
-    return !!localStorage.getItem('token');
+  loadUserState(): void {
+    if (this.isAuthenticatedSignal()) {
+      console.log('L’utilisateur est déjà authentifié.');
+      return;
+    }
+    this.logout();
+    console.log('Aucun état utilisateur chargé.');
   }
 
-  logout() {
-    localStorage.removeItem('token');
+  logout(): void {
+    this.isAuthenticatedSignal.set(false);
+    this.userEmailSignal.set(null);
+    this.userIdSignal.set(null);
   }
 }
