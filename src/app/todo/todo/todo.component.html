@@ -1,18 +1,35 @@
 <div class="row">
-  <div class="col">
-    <ol class="list-group">
-      @for (todo of todos; track todo) {
-        <li class="list-group-item">
-          {{todo.name}} : {{todo.content}}
-          <i (click)="deleteTodo(todo)" class="fa fa-trash" aria-hidden="true"></i>
-        </li>
-      }
-    </ol>
+  <input [(ngModel)]="todo().name" placeholder="Name" class="form-control" />
+  <input [(ngModel)]="todo().content" placeholder="Content" class="form-control" />
+  <button (click)="addtoDo()" class="btn btn-success" [disabled]="!todo().name.trim() || !todo().content.trim()">
+    Add
+  </button>
+</div>
+
+<div class="container text-center">
+  @for ( status of statuses ; track status ) {
+  <div class="row">
+    <div class="col">
+      <h3 class="fs-1">{{ status }}</h3>
+    </div>
+    @for ( item of getTodosStatus(status) ; track item.id ) {
+    <div class="row">
+      <div class="col">
+        <p class="fs-3">{{ item.name }} : {{ item.content }}</p>
+      </div>
+      <div class="col">
+        <button (click)="removeTodo(item.id)" class="btn btn-danger m-2">
+          Remove
+        </button>
+        @for( newStatus of statuses ; track newStatus ) { @if (newStatus !==
+        status) {
+        <button (click)="changestatus(item, newStatus)" class="btn btn-info m-2">
+          {{ newStatus }}
+        </button>
+        }}
+      </div>
+    </div>
+    }
   </div>
-  <div class="col">
-    name: <input appRainbowText [(ngModel)]="todo.name" type="text" class="form-control">
-    content: <input [(ngModel)]="todo.content" type="text" class="form-control">
-    <button (click)="addTodo()" [disabled]="!todo.name.trim() || !todo.content.trim()"
-    class="btn btn-primary m-2">add</button>
-  </div>
+  }
 </div>

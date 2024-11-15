@@ -1,13 +1,24 @@
-/* ttc-calculator.component.css */
 .ttc-calculator {
-    border: 1px solid #ccc;
-    padding: 20px;
-  }
-  
-  .input-group {
-    margin-bottom: 10px;
-  }
-  
-  .results {
-    margin-top: 20px;
-  }
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 20px;
+}
+
+.result {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: green;
+}

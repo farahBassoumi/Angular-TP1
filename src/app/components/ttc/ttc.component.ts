@@ -1,52 +1,72 @@
-import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, computed, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-ttc',
   standalone: true,
-  imports: [FormsModule,CurrencyPipe],
+  imports: [CurrencyPipe, FormsModule],
   templateUrl: './ttc.component.html',
   styleUrl: './ttc.component.css'
 })
-export class TtcComponent implements OnInit {
-  quantity = 1;
-  price = 0;
-  vat = 18;
-  discount = 0;
-  totalTTC = 0;
+export class TtcComponent {
+  quantity = signal(1);
+  unitPrice = signal(0);
+  vat = signal(18);
 
-  ngOnInit() {
-    this.calculateTTC();
-  }
+   discount =computed(() =>{  
+     let discount=0;
+     if (this.quantity() >= 10 && this.quantity() <= 15) {
+       discount = 0.20;
+     } else if (this.quantity() > 15) {
+       discount = 0.30;
+     }
+     return(discount * this.quantity() * this.unitPrice());
+    });
 
-  onQuantityChange(event: Event) {
-    this.quantity = +(event.target as HTMLInputElement).value;
-    this.calculateTTC();
-  }
+  // calculateTotalPrice() {
+  //   let basePrice = this.unitPrice() * this.quantity();
+  //   console.log('lm',basePrice);
 
-  onPriceChange(event: Event) {
-    this.price = +(event.target as HTMLInputElement).value;
-    this.calculateTTC();
-  }
+  //   let discount = 0;
 
-  onVatChange(event: Event) {
-    +(event.target as HTMLInputElement).value;
-    this.calculateTTC();
-  }
+  //   if (this.quantity() >= 10 && this.quantity() <= 15) {
+  //     discount = 0.20;
+  //   } else if (this.quantity() > 15) {
+  //     discount = 0.30;
+  //   }
+  //   this.discount=discount * this.quantity() * this.unitPrice();
 
-  calculateTTC() {
-    const priceHT = this.price * this.quantity;
-    let discount = 0;
+  //   basePrice = basePrice - this.discount;
 
-    if (this.quantity >= 10 && this.quantity <= 15) {
-      discount = 0.2;
-    } else if (this.quantity > 15) {
-      discount = 0.3;
+  //    ttcPrice = basePrice * (1 + this.vat() / 100);
+
+  //   this.totalPrice.set(ttcPrice);
+  // }
+  totalPrice = computed(() =>{ 
+    let basePrice = this.unitPrice() * this.quantity();
+
+    let discount=0;
+    if (this.quantity() >= 10 && this.quantity() <= 15) {
+      discount = 0.20;
+    } else if (this.quantity() > 15) {
+      discount = 0.30;
     }
+    return( basePrice * (1 + this.vat() / 100));
+  });
 
-    const priceHTDiscounted = priceHT - (priceHT * discount);
-    const vatAmount = priceHTDiscounted * (this.vat / 100);
-    this.totalTTC = priceHTDiscounted + vatAmount;
-    this.discount = priceHT * discount;
+  setunitPrice(val:number){
+    console.log('unitprice'+val);
+
+    this.unitPrice.set(val);
+  }
+  setquantity(val:number){
+    console.log('quantity'+val);
+
+    this.quantity.set(val);
+  }
+  setvat(val:number){
+    console.log('vat'+val);
+    this.vat.set(val);
   }
 }
